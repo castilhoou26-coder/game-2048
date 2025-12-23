@@ -4,9 +4,21 @@
 <meta charset="UTF-8">
 <title>2048 Game</title>
 <style>
-    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #faf8ef; }
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #faf8ef; margin: 0; }
     #game { display: grid; grid-template-columns: repeat(4, 80px); grid-gap: 10px; }
-    .tile { width: 80px; height: 80px; background: #cdc1b4; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; color: #776e65; border-radius: 5px; }
+    .tile { width: 80px; height: 80px; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; border-radius: 5px; color: #776e65; }
+    .tile-0 { background: #cdc1b4; }
+    .tile-2 { background: #eee4da; }
+    .tile-4 { background: #ede0c8; }
+    .tile-8 { background: #f2b179; color: #f9f6f2; }
+    .tile-16 { background: #f59563; color: #f9f6f2; }
+    .tile-32 { background: #f67c5f; color: #f9f6f2; }
+    .tile-64 { background: #f65e3b; color: #f9f6f2; }
+    .tile-128 { background: #edcf72; color: #f9f6f2; }
+    .tile-256 { background: #edcc61; color: #f9f6f2; }
+    .tile-512 { background: #edc850; color: #f9f6f2; }
+    .tile-1024 { background: #edc53f; color: #f9f6f2; }
+    .tile-2048 { background: #edc22e; color: #f9f6f2; }
 </style>
 </head>
 <body>
@@ -40,7 +52,7 @@ function render() {
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
             const tile = document.createElement('div');
-            tile.className = 'tile';
+            tile.className = 'tile tile-' + tabuleiro[i][j];
             tile.textContent = tabuleiro[i][j] === 0 ? '' : tabuleiro[i][j];
             gameDiv.appendChild(tile);
         }
@@ -86,19 +98,6 @@ function moverBaixo() {
     transpor();
 }
 
-document.addEventListener('keydown', (e) => {
-    switch(e.key) {
-        case 'ArrowLeft': moverEsquerda(); break;
-        case 'ArrowRight': moverDireita(); break;
-        case 'ArrowUp': moverCima(); break;
-        case 'ArrowDown': moverBaixo(); break;
-        default: return;
-    }
-    addNumero();
-    render();
-    checkGameOver();
-});
-
 function checkGameOver() {
     for (let i=0;i<4;i++){
         for (let j=0;j<4;j++){
@@ -106,6 +105,45 @@ function checkGameOver() {
         }
     }
 }
+
+document.addEventListener('keydown', (e) => {
+    let moved = false;
+    switch(e.key) {
+        case 'ArrowLeft': moverEsquerda(); moved = true; break;
+        case 'ArrowRight': moverDireita(); moved = true; break;
+        case 'ArrowUp': moverCima(); moved = true; break;
+        case 'ArrowDown': moverBaixo(); moved = true; break;
+        default: return;
+    }
+    if(moved) { addNumero(); render(); checkGameOver(); }
+});
+
+// Swipe para celular
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+}, false);
+
+document.addEventListener('touchend', function(e) {
+    let touchEndX = e.changedTouches[0].screenX;
+    let touchEndY = e.changedTouches[0].screenY;
+    let dx = touchEndX - touchStartX;
+    let dy = touchEndY - touchStartY;
+
+    if(Math.abs(dx) > Math.abs(dy)) {
+        if(dx > 30) { moverDireita(); }
+        else if(dx < -30) { moverEsquerda(); }
+        else return;
+    } else {
+        if(dy > 30) { moverBaixo(); }
+        else if(dy < -30) { moverCima(); }
+        else return;
+    }
+    addNumero(); render(); checkGameOver();
+}, false);
 
 addNumero();
 addNumero();
